@@ -9,3 +9,8 @@ moving_average <- (v[-(1:10)] - v[-((length(v) - 9): length(v))]) / 10
 
 descriptions_stat <- aggregate(cbind(mtcars$hp, mtcars$disp) ~ mtcars$am, mtcars, sd)
 descriptions_stat
+
+aggregate(Ozone ~ Month, data = airquality[7 <= airquality$Month & airquality$Month <= 9, ], length)
+
+describeBy(airquality, airquality$Month)
+
