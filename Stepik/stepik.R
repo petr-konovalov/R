@@ -158,7 +158,109 @@ smart_cor(test_data)
 df <- read.table('dataset_11508_12.txt')
 fff <- summary(lm(V1 ~ V2, df))
 
-df <- ggplot2::diamonds
-df1 <- subset(df, cut == 'Ideal' & carat == 0.48)
-
 fit_coef <- lm(price ~ depth, subset(ggplot2::diamonds, cut == 'Ideal' & carat == 0.46))$coefficients
+
+regr.calc <- function(x){
+  oldNames <- names(x)
+  names(x) <- c("V1", "V2")
+  if (cor.test(x$V1, x$V2)$p.value < 0.05) {
+    x$fit <- lm(V1 ~ V2, x)$fitted.values
+    names(x) <- c(oldNames, 'fit')
+    return(x)
+  } else {
+    return("There is no sense in prediction")
+  }
+}
+
+ggplot(iris, aes(x = Sepal.Width, y = Petal.Width, col = Species))+
+  geom_point(size = 2) + 
+  geom_smooth(method = "lm")
+
+test_data <- read.csv("https://stepic.org/media/attachments/course/129/fill_na_test.csv")
+fill_na <- function(x){
+  flt <-  !is.na(x$y)
+  lReg <- lm(y ~ x_1 + x_2, x)
+  x$y_full <- predict(lReg, x[1:2])
+  x$y_full[flt] <- x$y[flt]
+  return(x)
+}
+
+fill_na(test_data)
+
+model <- lm(wt ~ mpg + disp, mtcars)
+
+df <- mtcars
+df$am <- factor(df$am, labels = c('Automatic', 'Manual'))
+
+summary(lm(mpg ~ wt * am, df))
+
+library(ggplot2)
+# сначала переведем переменную am в фактор
+mtcars$am <- factor(mtcars$am)
+
+# теперь строим график
+my_plot <- ggplot(mtcars, aes(x = wt, y = mpg, col = am)) + 
+  geom_smooth(method = 'lm')
+
+model_full <- lm(rating ~ ., data = attitude) 
+model_null <- lm(rating ~ 1, data = attitude)
+ideal_model <- step(object = model_null, scope = list(lower = model_null, upper = model_full), direction = 'forward')
+anova(ideal_model, model_full)
+
+calc_quality_stats <- function(df) {
+  df$Fail <- as.logical(df$Fail)
+  df$avgErr <- as.numeric(df$avgErr)
+  df$avgMaxErr <- as.numeric(df$avgMaxErr)
+  df$less5cmErrTime <- as.numeric(df$less5cmErrTime)
+  df$less10cmErrTime <- as.numeric(df$less10cmErrTime)
+  df$less15cmErrTime <- as.numeric(df$less15cmErrTime)
+  df$less20cmErrTime <- as.numeric(df$less20cmErrTime)
+  dfNFail <- subset(df, !Fail)
+  
+  return(list(
+    length(subset(df, Fail)$Fail),
+    mean(dfNFail$avgErr),
+    mean(dfNFail$avgMaxErr),
+    length(subset(dfNFail, less5cmErrTime < 0)$Fail),
+    length(subset(dfNFail, less10cmErrTime < 0)$Fail),
+    length(subset(dfNFail, less15cmErrTime < 0)$Fail),
+    length(subset(dfNFail, less20cmErrTime < 0)$Fail),
+    mean(subset(dfNFail, less5cmErrTime > 0)$less5cmErrTime),
+    mean(subset(dfNFail, less10cmErrTime > 0)$less10cmErrTime),
+    mean(subset(dfNFail, less15cmErrTime > 0)$less15cmErrTime),
+    mean(subset(dfNFail, less20cmErrTime > 0)$less20cmErrTime)
+  ))
+}
+
+df <- read.csv('/home/petr/Рабочий стол/python/Симуляция для IFAC/random_sinus_Phs006Amp13_walls_experiments.csv')
+levels(df$Fail)
+df$Fail <- as.logical(df$Fail)
+length(subset(df, Fail)$Fail)
+dfNFail <- subset(df, !Fail)
+mean(dfNFail$avgErr)
+mean(dfNFail$avgMaxErr)
+length(subset(dfNFail, less5cmErrTime < 0)$Fail)
+length(subset(dfNFail, less10cmErrTime < 0)$Fail)
+length(subset(dfNFail, less15cmErrTime < 0)$Fail)
+length(subset(dfNFail, less20cmErrTime < 0)$Fail)
+mean(subset(dfNFail, less5cmErrTime > 0)$less5cmErrTime)
+mean(subset(dfNFail, less10cmErrTime > 0)$less10cmErrTime)
+mean(subset(dfNFail, less15cmErrTime > 0)$less15cmErrTime)
+mean(subset(dfNFail, less20cmErrTime > 0)$less20cmErrTime)
+
+c1 <- merge(list("rndsinsum_phs006amp13"), calc_quality_stats(read.csv('/home/petr/Рабочий стол/python/Симуляция для IFAC/random_sinus_Phs006Amp13_walls_experiments.csv')))
+c2 <- merge(list("rndsinsum_phs003amp13"), calc_quality_stats(read.csv('/home/petr/Рабочий стол/python/Симуляция для IFAC/random_sinus_Phs003Amp13_walls_experiments.csv')))
+c3 <- merge(list("zigzag"), calc_quality_stats(read.csv('/home/petr/Рабочий стол/python/Симуляция для IFAC/zig_zag_experiments.csv')))
+c4 <- merge(list("streight"), calc_quality_stats(read.csv('/home/petr/Рабочий стол/python/Симуляция для IFAC/streight_line_experiments.csv')))
+
+names(c1) <- c("scene_type", "fail_count", "avgErr", "avgMaxErr", "more5cmErrCnt", "more10cmErrCnt", "more15cmErrCnt", "more20cmErrCnt", "avg5cmErrTime", "avg10cmErrTime", "avg15cmErrTime", "avg20cmErrTime")
+names(c2) <- names(c1)
+names(c3) <- names(c2)
+names(c4) <- names(c3)
+#common_table <- data.frame("scene_type" = "undefined", "fail_count" = 0, "avgErr" = 0, "avgMaxErr" = 0, "more5cmErrCnt" = 0, "more10cmErrCnt" = 0, "more15cmErrCnt" = 0, "more20cmErrCnt" = 0, "avg5cmErrTime" = 0, "avg10cmErrTime" = 0, "avg15cmErrTime" = 0, "avg20cmErrTime" = 0)
+#common_table <- data.frame("scene_type", "fail_count", "avgErr", "avgMaxErr", "more5cmErrCnt", "more10cmErrCnt", "more15cmErrCnt", "more20cmErrCnt", "avg5cmErrTime", "avg10cmErrTime", "avg15cmErrTime", "avg20cmErrTime")
+common_table <- data.frame(c1)
+common_table <- rbind(common_table, c2)
+common_table <- rbind(common_table, c3)
+common_table <- rbind(common_table, c4)
+write.csv(common_table, "/home/petr/Рабочий стол/python/Симуляция для IFAC/common_table.csv")
